@@ -1,0 +1,56 @@
+x: num
+y: num = 2
+x = 3
+
+z: num = x + y
+a: num = z ** y
+
+result: text = to_text(a)
+print(result)
+
+count: num = 0
+
+func test(x: num) -> text
+{
+    count = count + 1
+    if x == 0:
+    {
+        return "A"
+    }
+    if x == 1:
+    {
+        return "B"
+    }
+    return "C"
+}
+print(test(0))
+print(test(1))
+print(test(2))
+print("COUNT: " + count)
+
+func factorial(n: num) -> num
+{
+    if n == 0:
+    {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+print(to_text(factorial(1)))
+
+i: num = 0
+i = 1
+while i < 10
+{
+    print(to_text(i) + ":" + to_text(factorial(i)))
+    i = i + 1
+}
+
+func no_return() -> void
+{
+    print("NORET")
+}
+
+print("HI!")
+no_return()

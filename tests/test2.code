@@ -1,0 +1,87 @@
+func main() -> void
+{
+    cnt: num = 0
+    while cnt < 15
+    {
+        println("------------------------------------------")
+        println(cnt + "! = " + factorial(cnt)))
+        println("fib_" + cnt + " = " + fibonacci(cnt)))
+        println("PI with accuracy " + cnt*10 + " = " + compute_pi(cnt*10))
+        println("------------------------------------------")
+        println("")
+        cnt = cnt + 1
+    }
+
+    fizzbuzz(100)
+}
+
+func fizzbuzz(max: num) -> void
+{
+    cnt: num = 0
+    while cnt < max:
+    {
+        cnt = cnt + 1
+        if cnt % 15 == 0
+            println("FIZZBUZZ")
+        else if cnt % 3 == 0
+            println("FIZZ")
+        else if cnt % 5 == 0
+            println("BUZZ")
+        else
+            println(to_text(cnt))
+    }
+}
+
+func factorial(n: num) -> num
+{
+    if n < 0
+    {
+        return 0 - 1
+    }
+    if n == 0
+    {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+func fibonacci(n: num) -> num
+{
+    if n == 0
+    {
+        return 1
+    }
+    if n == 1
+    {
+        return 1
+    }
+
+    f1: num = 1
+    f2: num = 1
+
+    cnt: num = 1
+    while cnt < n
+    {
+        cnt = cnt + 1
+        temp: num = f1 + f2
+        f1 = f2
+        f2 = temp
+    }
+    return f2
+}
+
+func compute_pi(n: num) -> num
+{
+    sum: num = 0
+    i: num = 0
+
+    while i <= n
+    {
+        sum = sum + ((-1)**(i % 2)) * (1 / (1 + 2 * i))
+        i = i + 1
+    }
+
+    return sum * 4
+}
+
+main()

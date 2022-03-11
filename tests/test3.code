@@ -1,0 +1,21 @@
+func main() -> void
+{
+    x: list = ["Hello", 2]
+    println(to_text(x))
+    println(x[0])
+    println(to_text(x[1]))
+    println(x[0] + x[1])
+
+    y: list = x + "World"
+    println(to_text(y))
+
+    test: text = y[0]
+    test = test + "!"
+    y[0] = "YOU"
+
+    println(test)
+    println(to_text(y))
+    println(to_text(x))
+}
+
+main()
