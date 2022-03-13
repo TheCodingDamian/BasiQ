@@ -54,6 +54,8 @@ def parse(file_name: str) -> list[syntax.Expression]:
     return instruction_stack[0]
 
 def run_instructions(instructions: list[syntax.Expression]) -> None:
+    global stdout
+    stdout = ""
     context = execution_context.ExecutionContext(instructions)
     run(context)
 
@@ -394,15 +396,19 @@ def to_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
 
 def print_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     print(arguments[0], end="")
+    global stdout
+    stdout += str(arguments[0])
     return (None, execution_context.types["void"])
 
 def println_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     print(arguments[0])
+    global stdout
+    stdout += str(arguments[0]) + "\n"
     return (None, execution_context.types["void"])
 
-
+stdout = ""
 built_ins: dict[str, BuiltInFunction] = { "println": BuiltInFunction("println", ["text"], println_text), "print": BuiltInFunction("print", ["text"], print_text), "to_text": BuiltInFunction("to_text", ["any"], to_text) }
 
 if __name__ == "__main__":
     #main(sys.argv[1])
-    main("antlr-test/tests/test3.code")
+    main("tests/inputs/test1.code")

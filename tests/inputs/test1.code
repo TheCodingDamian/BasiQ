@@ -6,7 +6,7 @@ z: num = x + y
 a: num = z ** y
 
 result: text = to_text(a)
-print(result)
+println(result)
 
 count: num = 0
 
@@ -23,10 +23,10 @@ func test(x: num) -> text
     }
     return "C"
 }
-print(test(0))
-print(test(1))
-print(test(2))
-print("COUNT: " + count)
+println(test(0))
+println(test(1))
+println(test(2))
+println("COUNT: " + count)
 
 func factorial(n: num) -> num
 {
@@ -37,20 +37,20 @@ func factorial(n: num) -> num
     return n * factorial(n - 1)
 }
 
-print(to_text(factorial(1)))
+println(to_text(factorial(1)))
 
 i: num = 0
 i = 1
 while i < 10
 {
-    print(to_text(i) + ":" + to_text(factorial(i)))
+    println(to_text(i) + ":" + to_text(factorial(i)))
     i = i + 1
 }
 
 func no_return() -> void
 {
-    print("NORET")
+    println("NORET")
 }
 
-print("HI!")
+println("HI!")
 no_return()

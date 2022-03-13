@@ -1,8 +1,5 @@
-from dis import Instruction
-from signal import raise_signal
 from typing import Any, Tuple
 
-from numpy import var
 from syntax import Expression
 import syntax
 
