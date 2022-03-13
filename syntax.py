@@ -137,16 +137,16 @@ class FunctionCall(Expression):
         return result + ")"
 
 class ListAccess(Expression):
-    name: Variable
+    list: Expression
     key: Expression
 
-    def __init__(self, name: Variable, key: Expression) -> None:
+    def __init__(self, list: Expression, key: Expression) -> None:
         super().__init__()
-        self.name = name
+        self.list = list
         self.key = key
 
     def __str__(self) -> str:
-        return str(self.name) + "[" + str(self.key) + "]"
+        return str(self.list) + "[" + str(self.key) + "]"
 
 class Assignment(Expression):
     variable: Variable
@@ -160,17 +160,17 @@ class Assignment(Expression):
         return str(self.variable) + " = " + str(self.expression)
 
 class ListAssignment(Expression):
-    variable: Variable
+    expression: Expression
     key: Expression
     value: Expression
 
-    def __init__(self, variable: Variable, key: Expression, value: Expression) -> None:
-        self.variable = variable
+    def __init__(self, expression: Expression, key: Expression, value: Expression) -> None:
+        self.expression = expression
         self.value = value
         self.key = key
 
     def __str__(self) -> str:
-        return str(self.variable) + "[" + str(self.key) + "]" + " = " + str(self.value)
+        return str(self.expression) + "[" + str(self.key) + "]" + " = " + str(self.value)
 
 class UnaryOperation(Expression):
     expression: Expression

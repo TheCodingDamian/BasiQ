@@ -16,6 +16,26 @@ func main() -> void
     println(test)
     println(to_text(y))
     println(to_text(x))
+
+    y = y + x
+
+    println(to_text(y))
+
+    y[3][0] = "TEST"
+
+    println("Y: " + to_text(y))
+    println("X: " + to_text(x))
+
+    println(to_text(get_list()))
+    get_list()[0 + 0] = "alist"
+    println(to_text(get_list()))
+}
+
+alist: list = ["ALIST"]
+
+func get_list() -> list
+{
+    return alist
 }
 
 main()

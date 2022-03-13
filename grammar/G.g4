@@ -26,11 +26,12 @@ listExpression
     ;
 
 listAccess
-    : name = IDENTIFIER '[' key = expression ']'
+    : expr = listAccessBaseExpression '[' key = expression ']'
+    | other = listAccess '[' key = expression ']'
     ;
 
 listAssignment
-    : name = IDENTIFIER '[' key = expression ']' '=' value=expression
+    : expr = expression '[' key = expression ']' '=' value=expression
     ;
 
 variableDefinition
@@ -83,6 +84,13 @@ expression
     | functionCall
     | listAccess
     | primitive
+    | IDENTIFIER
+    ;
+
+listAccessBaseExpression
+    : '(' sub=expression ')'
+    | listExpression
+    | functionCall
     | IDENTIFIER
     ;
 

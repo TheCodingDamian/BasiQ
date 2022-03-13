@@ -113,11 +113,19 @@ class GVisitor(ParseTreeVisitor):
     
     # Visit a parse tree produced by GParser#listAccess.
     def visitListAccess(self, ctx:GParser.ListAccessContext):
-        return syntax.ListAccess(syntax.Variable(ctx.name.text), self.visit(ctx.key))
+        if ctx.other is not None:
+            return syntax.ListAccess(self.visit(ctx.other), self.visit(ctx.key))
+        return syntax.ListAccess(self.visit(ctx.expr), self.visit(ctx.key))
     
     # Visit a parse tree produced by GParser#listAssignment.
     def visitListAssignment(self, ctx:GParser.ListAssignmentContext):
-        return syntax.ListAssignment(syntax.Variable(ctx.name.text), self.visit(ctx.key), self.visit(ctx.value))
+        return syntax.ListAssignment(self.visit(ctx.expr), self.visit(ctx.key), self.visit(ctx.value))
+
+    def visitListAccessBaseExpression(self, ctx:GParser.ListAccessBaseExpressionContext):
+        if ctx.sub is not None:
+            return self.visit(ctx.sub)
+        return self.visitChildren(ctx)
+
 
 
 

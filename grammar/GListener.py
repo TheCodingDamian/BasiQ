@@ -170,6 +170,15 @@ class GListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GParser#listAccessBaseExpression.
+    def enterListAccessBaseExpression(self, ctx:GParser.ListAccessBaseExpressionContext):
+        pass
+
+    # Exit a parse tree produced by GParser#listAccessBaseExpression.
+    def exitListAccessBaseExpression(self, ctx:GParser.ListAccessBaseExpressionContext):
+        pass
+
+
     # Enter a parse tree produced by GParser#instruction.
     def enterInstruction(self, ctx:GParser.InstructionContext):
         pass

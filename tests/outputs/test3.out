@@ -1,8 +1,13 @@
-['Hello', 2.0]
+[Hello, 2]
 Hello
 2
 Hello2
-['Hello', 2.0, 'World']
+[Hello, 2, World]
 Hello!
-['YOU', 2.0, 'World']
-['Hello', 2.0]
+[YOU, 2, World]
+[Hello, 2]
+[YOU, 2, World, [Hello, 2]]
+Y: [YOU, 2, World, [TEST, 2]]
+X: [TEST, 2]
+[ALIST]
+[alist]

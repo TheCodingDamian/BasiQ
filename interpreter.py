@@ -1,5 +1,8 @@
 #TODO: for, list/dict-types
 #TODO: list: range, slice, length, addition
+#TODO: += and similar
+#TODO: refactor into class
+#TODO: functions on not-base level
 
 from typing import Tuple, Any
 import antlr4
@@ -256,8 +259,7 @@ def run_instruction(expression: syntax.Expression, context: execution_context.Ex
                 raise Exception("Array indices must be whole numbers")
             key_value = int(key_value)
 
-            var = context.stack[expression.variable.name]
-            (list_val, list_type) = (var.value, var.variable_type)
+            (list_val, list_type) = evaluate(expression.expression, context)
             if list_type != execution_context.types["list"]:
                 raise Exception("Can only access list, not " + list_type.name)
             
@@ -342,8 +344,9 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
             raise Exception("List index must be of type num")
         if key != int(key):
             raise Exception("List index must be whole number")
-        var = context.stack[expression.name.name]
-        (list_val, list_type) = (var.value, var.variable_type)
+
+
+        (list_val, list_type) = evaluate(expression.list, context)
         if list_type != execution_context.types["list"]:
             raise Exception("Can only access list, not " + list_type.name)
         if key >= len(list_val):
@@ -387,11 +390,15 @@ def run_built_in(name: str, parameters: list[Tuple[Any, execution_context.Variab
 
 def to_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     val = arguments[0]
-    result = str(arguments[0])
+    if type(val) is tuple:
+        val = val[0]
+
+    result = str(val)
     if isinstance(val, float) and int(val) == val:
-        result = str(int(arguments[0]))
+        result = str(int(val))
     if isinstance(val, list):
-        result = [x for (x, _) in val]
+        result = [to_text([(x, y)])[0] for (x, y) in val]
+        result = "[" + ", ".join(result) + "]"
     return (result, execution_context.types["text"])
 
 def print_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
@@ -411,4 +418,4 @@ built_ins: dict[str, BuiltInFunction] = { "println": BuiltInFunction("println", 
 
 if __name__ == "__main__":
     #main(sys.argv[1])
-    main("tests/inputs/test1.code")
+    main("tests/inputs/test3.code")
