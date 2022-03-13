@@ -25,3 +25,6 @@ class TestInterpreter:
     def test_four(self):
         run("tests/inputs/test4.code")
 
+    def test_five(self):
+        run("tests/inputs/test5.code")
+

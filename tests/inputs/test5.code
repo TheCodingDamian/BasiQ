@@ -1,0 +1,15 @@
+func main() -> void
+{
+    x: list = [1..10]
+    println(to_text(x))
+    y: list = [1..10..2]
+    println(to_text(y))
+    z: list = [10..0..-2]
+    println(to_text(z))
+
+    a: list = [10..0..-0.5]
+    println(to_text(a))
+
+}
+
+main()

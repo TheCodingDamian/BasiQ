@@ -1,4 +1,5 @@
 from __future__ import annotations
+from turtle import st
 
 
 
@@ -257,3 +258,21 @@ class ListExpression(Expression):
 
     def __str__(self) -> str:
         return "[" + ", ".join([str(x) for x in self.values]) + "]"
+
+class ListRange(Expression):
+    start: Expression
+    end: Expression
+    step: Expression
+
+    def __init__(self, start: Expression, end: Expression, step: Expression) -> None:
+        super().__init__()
+        self.start = start
+        self.end = end
+        self.step = step
+        if step is None:
+            self.step = NumberConstant(1)
+
+    def __str__(self) -> str:
+        if self.step is None or (isinstance(self.step, NumberConstant) and self.step.value == 1):
+            return "[" + str(self.start) + ".." + str(self.end) + "]"
+        return "[" + str(self.start) + ".." + str(self.end) + ".." + str(self.step) + "]"

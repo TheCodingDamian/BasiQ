@@ -109,6 +109,8 @@ class GVisitor(ParseTreeVisitor):
     
     # Visit a parse tree produced by GParser#listExpression.
     def visitListExpression(self, ctx:GParser.ListExpressionContext):
+        if ctx.range_start is not None:
+            return syntax.ListRange(self.visit(ctx.range_start), self.visit(ctx.range_end), self.visit(ctx.range_step) if ctx.range_step is not None else None)
         return syntax.ListExpression([self.visit(x) for x in ctx.children[1:-1:2]])
     
     # Visit a parse tree produced by GParser#listAccess.

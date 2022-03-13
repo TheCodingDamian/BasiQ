@@ -1,5 +1,5 @@
 #TODO: for, list/dict-types
-#TODO: list: range, slice, length, addition
+#TODO: list: range, slice
 #TODO: += and similar
 #TODO: refactor into class
 #TODO: functions on non-base level
@@ -340,6 +340,29 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
         for v in expression.values:
             result.append(evaluate(v, context))
         return (result, execution_context.types["list"])
+    elif type(expression) is syntax.ListRange:
+        (start, start_type) = evaluate(expression.start, context)
+        (end, end_type) = evaluate(expression.end, context)
+        (step, step_type) = evaluate(expression.step, context)
+        result = []
+        num_type = execution_context.types["num"]
+        if start_type != num_type or end_type != num_type or step_type != num_type:
+            raise Exception("List ranges must be numbers")
+        if step == 0:
+            raise Exception("List range step cannot be 0")
+        
+        if step > 0:
+            current = start
+            while current < end:
+                result.append((current, num_type))
+                current += step
+        else:
+            current = start
+            while current > end:
+                result.append((current, num_type))
+                current += step
+        return (result, execution_context.types["list"])
+
     elif type(expression) is syntax.ListAccess:
         (key, tp) = evaluate(expression.key, context)
         if tp != execution_context.types["num"]:
@@ -455,4 +478,4 @@ built_ins: dict[str, BuiltInFunction] = {
 
 if __name__ == "__main__":
     #main(sys.argv[1])
-    main("tests/inputs/test3.code")
+    main("tests/inputs/test5.code")
