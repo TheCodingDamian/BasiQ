@@ -149,6 +149,26 @@ class ListAccess(Expression):
     def __str__(self) -> str:
         return str(self.list) + "[" + str(self.key) + "]"
 
+class ListSliceAccess(Expression):
+    list: Expression
+    start: Expression
+    end: Expression
+    step: Expression
+
+    def __init__(self, list: Expression, start: Expression, end: Expression, step: Expression) -> None:
+        super().__init__()
+        self.list = list
+        self.start = start
+        self.end = end
+        self.step = step
+        if step is None:
+            self.step = NumberConstant(1)
+
+    def __str__(self) -> str:
+        if self.step is None or (isinstance(self.step, NumberConstant) and self.step.value == 1):
+            return "[" + str(self.start) + ":" + str(self.end) + "]"
+        return  "[" + str(self.start) + ":" + str(self.end) + ":" + str(self.step) + "]"
+
 class Assignment(Expression):
     variable: Variable
     expression: Expression

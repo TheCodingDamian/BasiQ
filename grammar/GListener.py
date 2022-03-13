@@ -62,6 +62,15 @@ class GListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GParser#listSlice.
+    def enterListSlice(self, ctx:GParser.ListSliceContext):
+        pass
+
+    # Exit a parse tree produced by GParser#listSlice.
+    def exitListSlice(self, ctx:GParser.ListSliceContext):
+        pass
+
+
     # Enter a parse tree produced by GParser#listAssignment.
     def enterListAssignment(self, ctx:GParser.ListAssignmentContext):
         pass

@@ -1,5 +1,5 @@
 #TODO: for, list/dict-types
-#TODO: list: range, slice
+#TODO: list: range
 #TODO: += and similar
 #TODO: refactor into class
 #TODO: functions on non-base level

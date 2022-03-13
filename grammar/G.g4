@@ -28,8 +28,13 @@ listExpression
 
 listAccess
     : expr = listAccessBaseExpression '[' key = expression ']'
+    | expr = listAccessBaseExpression '[' list_slice = listSlice ']'
     | other = listAccess '[' key = expression ']'
+    | other = listAccess '[' list_slice = listSlice ']'
     ;
+
+listSlice
+    : slice_start = expression ':' slice_end = expression (':' slice_step = expression) ;
 
 listAssignment
     : expr = expression '[' key = expression ']' '=' value=expression
