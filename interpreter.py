@@ -2,7 +2,9 @@
 #TODO: list: range, slice, length, addition
 #TODO: += and similar
 #TODO: refactor into class
-#TODO: functions on not-base level
+#TODO: functions on non-base level
+#TODO: objects?
+#TODO: real stdout
 
 from typing import Tuple, Any
 import antlr4
@@ -102,8 +104,8 @@ def run_operation(left: Any, right: Any, left_type: Any, right_type: Any, operat
             if left_type == num_type and right_type == num_type:
                 return (left + right, num_type)
             
-            (left, _) = to_text([left])
-            (right, _) = to_text([right])
+            (left, _) = to_text([(left, left_type)])
+            (right, _) = to_text([(right, right_type)])
             return (str(left) + str(right), text_type)
         
         case "-":
@@ -385,11 +387,11 @@ def run_built_in(name: str, parameters: list[Tuple[Any, execution_context.Variab
     for (i, (value, type)) in enumerate(parameters):
         if type != built_in.parameter_types[i] and built_in.parameter_types[i] != execution_context.types["any"]:
             raise Exception("Invalid parameter type for built-in " + name)
-        params.append(value)
+        params.append((value, type))
     return built_in.func(params)
 
 def to_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
-    val = arguments[0]
+    val = arguments[0][0]
     if type(val) is tuple:
         val = val[0]
 
@@ -397,24 +399,59 @@ def to_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     if isinstance(val, float) and int(val) == val:
         result = str(int(val))
     if isinstance(val, list):
-        result = [to_text([(x, y)])[0] for (x, y) in val]
+        result = [to_text([((x, y), execution_context.types["list"])])[0] for (x, y) in val]
         result = "[" + ", ".join(result) + "]"
     return (result, execution_context.types["text"])
 
 def print_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
-    print(arguments[0], end="")
+    print(arguments[0][0], end="")
     global stdout
-    stdout += str(arguments[0])
+    stdout += str(arguments[0][0])
     return (None, execution_context.types["void"])
 
 def println_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
-    print(arguments[0])
+    print(arguments[0][0])
     global stdout
-    stdout += str(arguments[0]) + "\n"
+    stdout += str(arguments[0][0]) + "\n"
     return (None, execution_context.types["void"])
 
+def append(arguments: list) -> Tuple[Any, execution_context.VariableType]:
+    (list_val, list_type) = arguments[0]
+    (val_val, val_type) = arguments[1]
+    
+    list_val.append((val_val, val_type))
+    return (None, execution_context.types["void"])
+
+def remove(arguments: list) -> Tuple[Any, execution_context.VariableType]:
+    (list_val, list_type) = arguments[0]
+    (val_val, val_type) = arguments[1]
+    
+    list_val.remove((val_val, val_type))
+    return (None, execution_context.types["void"])
+
+def index_of(arguments: list) -> Tuple[Any, execution_context.VariableType]:
+    (list_val, list_type) = arguments[0]
+    (val_val, val_type) = arguments[1]
+    
+    result = list_val.index((val_val, val_type))
+    return (result, execution_context.types["num"])
+
+def length(arguments: list) -> Tuple[Any, execution_context.VariableType]:
+    (list_val, list_type) = arguments[0]
+    
+    result = len(list_val)
+    return (result, execution_context.types["num"])
+
 stdout = ""
-built_ins: dict[str, BuiltInFunction] = { "println": BuiltInFunction("println", ["text"], println_text), "print": BuiltInFunction("print", ["text"], print_text), "to_text": BuiltInFunction("to_text", ["any"], to_text) }
+built_ins: dict[str, BuiltInFunction] = { 
+    "println": BuiltInFunction("println", ["text"], println_text), 
+    "print": BuiltInFunction("print", ["text"], print_text), 
+    "to_text": BuiltInFunction("to_text", ["any"], to_text), 
+    "append": BuiltInFunction("append", ["list", "any"], append), 
+    "remove": BuiltInFunction("remove", ["list", "any"], remove), 
+    "index_of": BuiltInFunction("index_of", ["list", "any"], index_of), 
+    "length": BuiltInFunction("length", ["list"], length), 
+}
 
 if __name__ == "__main__":
     #main(sys.argv[1])

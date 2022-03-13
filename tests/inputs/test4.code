@@ -1,0 +1,36 @@
+func main() -> void
+{
+    x: list = [1, 2, 3]
+
+    println(to_text(x))
+    append(x, 4)
+    println(to_text(x))
+    remove(x, 2)
+    println(to_text(x))
+    x[0] = "HEY"
+    println(to_text(x))
+    println(to_text(index_of(x, 3)))
+    println(to_text(length(x)))
+
+    println("")
+
+    println(to_text(get_list()))
+    append(get_list(), 4)
+    println(to_text(get_list()))
+    remove(get_list(), 2)
+    println(to_text(get_list()))
+    x[0] = "HEY"
+    println(to_text(x))
+    println(to_text(index_of(get_list(), 3)))
+    println(to_text(length(get_list())))
+
+}
+
+alist: list = [1, 2, 3]
+
+func get_list() -> list
+{
+    return alist
+}
+
+main()
