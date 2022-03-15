@@ -1,5 +1,5 @@
-#TODO: for, list/dict-types
-#TODO: list: range
+#TODO: for
+#TODO: dict-types
 #TODO: += and similar
 #TODO: refactor into class
 #TODO: functions on non-base level
@@ -301,7 +301,12 @@ def run_instruction(expression: syntax.Expression, context: execution_context.Ex
                 raise Exception("While conditions must be bool-type")
             if value:
                 context.move_into(expression.children)
-        case syntax.ForLoop:
+        case syntax.ForLoop as forexpression:
+            (list_val, list_type) = evaluate(forexpression.over)
+            if list_type != execution_context.types["list"]:
+                raise Exception("Can only iterate over list")
+            
+            
             pass #TODO
         case syntax.FunctionCall:
             run_function_call(expression, context)
@@ -374,10 +379,51 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
         (list_val, list_type) = evaluate(expression.list, context)
         if list_type != execution_context.types["list"]:
             raise Exception("Can only access list, not " + list_type.name)
-        if key >= len(list_val):
+        if key >= len(list_val) or key < -len(list_val):
             raise Exception("Index out of range: " + str(int(key)) + " > " + str(len(list_val)))
         return list_val[int(key)]
+    
+    elif type(expression) is syntax.ListSliceAccess:
+        num_type = execution_context.types["num"]
+
+        (start_val, start_type) = (0, num_type)
+        if expression.start is not None:
+            (start_val, start_type) = evaluate(expression.start, context)
         
+        (end_val, end_type) = (0, num_type)
+        if expression.end is not None:
+            (end_val, end_type) = evaluate(expression.end, context)
+        (step_val, step_type) = evaluate(expression.step, context)
+
+        if start_type != num_type or end_type != num_type or step_type != num_type:
+            raise Exception("List slices must be integers")
+        if start_val != int(start_val) or end_val != int(end_val) or step_val != int(step_val):
+            raise Exception("List slices must be integers")
+        
+        (list_val, list_type) = evaluate(expression.list, context)
+        if list_type != execution_context.types["list"]:
+            raise Exception("Can only access list, not " + list_type.name)
+        
+        if expression.end is None:
+            end_val = len(list_val)
+
+        new_list = []
+        start_val = int(start_val)
+        if start_val < 0:
+            start_val += len(list_val)
+        end_val = int(end_val)
+        if end_val < 0:
+            end_val += len(list_val)
+        start_val = int(start_val)
+        end_val = int(end_val)
+        step_val = int(step_val)
+
+        for i in range(start_val, end_val, step_val):
+            if i < 0 or i >= len(list_val):
+                raise Exception("Array slice index out of range")
+            new_list.append(list_val[i])
+
+        return (new_list, execution_context.types["list"])
 
             
             
@@ -477,5 +523,6 @@ built_ins: dict[str, BuiltInFunction] = {
 }
 
 if __name__ == "__main__":
+
     #main(sys.argv[1])
     main("tests/inputs/test5.code")

@@ -116,8 +116,27 @@ class GVisitor(ParseTreeVisitor):
     # Visit a parse tree produced by GParser#listAccess.
     def visitListAccess(self, ctx:GParser.ListAccessContext):
         if ctx.other is not None:
+            if ctx.list_slice is not None:
+                (start, end, step) = self.visitSlice(ctx.list_slice)
+                return syntax.ListSliceAccess(self.visit(ctx.other), start, end, step)
             return syntax.ListAccess(self.visit(ctx.other), self.visit(ctx.key))
+        if ctx.list_slice is not None:
+            (start, end, step) = self.visitSlice(ctx.list_slice)
+            return syntax.ListSliceAccess(self.visit(ctx.expr), start, end, step)
         return syntax.ListAccess(self.visit(ctx.expr), self.visit(ctx.key))
+
+    def visitSlice(self, ctx:GParser.ListSliceContext):
+        start = None
+        end = None
+
+        if ctx.slice_start is not None:
+            start = self.visit(ctx.slice_start)
+        if ctx.slice_end is not None:
+            end = self.visit(ctx.slice_end)
+        step = syntax.NumberConstant(1)
+        if ctx.slice_step is not None:
+            step = self.visit(ctx.slice_step)
+        return (start, end, step)
     
     # Visit a parse tree produced by GParser#listAssignment.
     def visitListAssignment(self, ctx:GParser.ListAssignmentContext):

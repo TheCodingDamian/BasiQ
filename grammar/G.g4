@@ -2,7 +2,7 @@ grammar G;
 
 TYPE: 'num' | 'text' | 'bool' | 'void' | 'list' | 'dict' ;
 BOOL : 'False'|'True' ;
-NUMBER : [-]? [0-9]+(.[0-9]+)? ; //[1-9][0-9]*(.[0-9]+)?' ;
+NUMBER : [-]? [0-9]+('.'[0-9]+)? ; //[1-9][0-9]*(.[0-9]+)?' ;
 IDENTIFIER : [A-Za-z][A-Za-z0-9_]* ;
 WP : [ \t\r\n] -> skip ;
 COMMENT : [#].*? -> skip ;
@@ -23,7 +23,7 @@ primitive
 
 listExpression
     : '[' expression? (',' expression)* ']'
-    | '[' range_start = expression '..' range_end = expression ('..' range_step = expression )?']'
+    | '[' range_start = expression '..' range_end = expression ('..' range_step = expression )? ']'
     ;
 
 listAccess
@@ -34,7 +34,7 @@ listAccess
     ;
 
 listSlice
-    : slice_start = expression ':' slice_end = expression (':' slice_step = expression) ;
+    : (slice_start = expression)? ':' (slice_end = expression)? (':' slice_step = expression)? ;
 
 listAssignment
     : expr = expression '[' key = expression ']' '=' value=expression

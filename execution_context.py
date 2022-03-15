@@ -155,3 +155,6 @@ class ExecutionContext:
 
     def entered_if(self) -> bool:
         return self.stack.top().entered_if
+
+    def next_iterator(self, for_loop: syntax.ForLoop) -> int:
+        pass #TODO

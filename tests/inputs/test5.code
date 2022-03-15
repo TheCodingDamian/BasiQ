@@ -7,8 +7,46 @@ func main() -> void
     z: list = [10..0..-2]
     println(to_text(z))
 
+    println("A")
     a: list = [10..0..-0.5]
     println(to_text(a))
+
+    println("B")
+    b: list = x[0:5]
+    println(to_text(b))
+
+    println("C")
+    b = x[3:7]
+    println(to_text(b))
+
+    println("D")
+    b = x[0:10:2]
+    println(to_text(b))
+
+    println("E")
+    b = x[8:0:-1]
+    println(to_text(b))
+
+    println("F")
+    b = x[:5:2]
+    println(to_text(b))
+
+    println("G")
+    b = x[2::2]
+    println(to_text(b))
+
+    println("H")
+    b = x[4:]
+    println(to_text(b))
+
+    println("I")
+    b = x[:6]
+    println(to_text(b))
+
+    println("J")
+    b = x[:]
+    println(to_text(b))
+
 
 }
 
