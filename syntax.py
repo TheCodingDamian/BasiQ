@@ -180,6 +180,19 @@ class Assignment(Expression):
     def __str__(self) -> str:
         return str(self.variable) + " = " + str(self.expression)
 
+class OperationAssignment(Expression):
+    variable: Variable
+    expression: Expression
+    operator: str
+
+    def __init__(self, variable: Variable, operator: str, expression: Expression) -> None:
+        self.variable = variable
+        self.expression = expression
+        self.operator = operator
+
+    def __str__(self) -> str:
+        return str(self.variable) + " " + self.operator + "= " + str(self.expression)
+
 class ListAssignment(Expression):
     expression: Expression
     key: Expression

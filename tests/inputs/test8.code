@@ -1,0 +1,33 @@
+func main() -> void
+{
+    a: num = 2
+    println(a)
+
+    a += 3
+    println(a)
+    a *= 4
+    println(a)
+
+    a %= 3
+
+    println(a)
+
+    b: text = "hello"
+    println(b)
+
+    b += "World"
+    println(b)
+
+    b += 3
+    println(b)
+
+    c: list
+    println(c)
+    c += 1
+    println(c)
+    c += "TWO"
+    println(c)
+
+}
+
+main()

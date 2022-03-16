@@ -1,0 +1,22 @@
+b: num = 2
+
+func main() -> void
+{
+    a: num = 3
+    b = 5
+
+    func test() -> num
+    {
+        println("WITHIN BEFORE: " + a)
+        a = 4
+        println("WITHIN AFTER: " + a)
+        return a
+    }
+    a = 1
+    test()
+    println("AFTER: " + a)
+}
+
+println(b)
+main()
+println(b)

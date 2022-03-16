@@ -1,11 +1,10 @@
-#TODO: for
-#TODO: dict-types
-#TODO: += and similar
 #TODO: refactor into class
-#TODO: functions on non-base level
 #TODO: objects?
 #TODO: real stdout
+#TODO: more efficient iteration over dict
+#TODO: error messages
 
+from ast import expr
 from typing import Tuple, Any
 import antlr4
 from grammar import GLexer
@@ -215,9 +214,9 @@ def run_function_call(expression: syntax.FunctionCall, context: execution_contex
     
     instructions = function.instructions
     #context.move_into(instructions)
-    new_context = execution_context.ExecutionContext(instructions, min_scope_length=2)
+    new_context = execution_context.ExecutionContext(instructions, min_scope_length=len(function.base_stack) + 1)
 
-    new_context.stack.stack.append(context.stack.stack[-1])
+    new_context.stack.stack.extend(function.base_stack)
     
     for i in range(0, len(parameters)):
         (p_name, p_type) = function.parameters[i]
@@ -227,11 +226,11 @@ def run_function_call(expression: syntax.FunctionCall, context: execution_contex
         p_variable = execution_context.Variable(p_type, arg_val)
         new_context.stack.define(p_name, p_variable)
     
-    (value, type) = run(new_context) #TODO global scope MUST be copied because functions are inside of it too
+    (value, type) = run(new_context)
     if type is None:
         type = execution_context.types["void"]
     if type != function.return_type:
-        raise Exception("Function " + name + " return value of invalid type")
+        raise Exception("Function " + name + " returns value of invalid type")
     return (value, type)
 
 
@@ -251,25 +250,36 @@ def run_instruction(expression: syntax.Expression, context: execution_context.Ex
             if tp != context.stack[expression.variable.name].variable_type:
                 raise Exception("Assigning value of incorrect type to variable " + expression.variable.name)
             context.stack[expression.variable.name].value = value
+        case syntax.OperationAssignment:
+            (value, tp) = evaluate(expression.expression, context)
+            (left, left_tp) = (context.stack[expression.variable.name].value, context.stack[expression.variable.name].variable_type)
+            
+            (result_val, result_type) = run_operation(left, value, left_tp, tp, expression.operator)
+
+            if result_type != left_tp:
+                raise Exception("Result of assignment has the wrong type")
+            context.stack[expression.variable.name].value = result_val
+
         case syntax.ListAssignment:
-            (value, tp) = evaluate(expression.value, context)
-
-            (key_value, key_tp) = evaluate(expression.key, context)
-            if key_tp != execution_context.types["num"]:
-                raise Exception("Array indices must be num, not " + key_tp.name)
-            if int(key_value) != key_value:
-                raise Exception("Array indices must be whole numbers")
-            key_value = int(key_value)
-
             (list_val, list_type) = evaluate(expression.expression, context)
-            if list_type != execution_context.types["list"]:
-                raise Exception("Can only access list, not " + list_type.name)
-            
-            if key_value >= len(list_val):
-                raise Exception("Index out of range: " + str(int(key_value)) + " > "  + str(len(list_val)))
-            
+            (value, tp) = evaluate(expression.value, context)
+            (key_value, key_tp) = evaluate(expression.key, context)
 
-            list_val[key_value] = (value, tp)
+            if list_type == execution_context.types["list"]:
+                if key_tp != execution_context.types["num"]:
+                    raise Exception("Array indices must be num, not " + key_tp.name)
+                if int(key_value) != key_value:
+                    raise Exception("Array indices must be whole numbers")
+                key_value = int(key_value)
+                if key_value >= len(list_val):
+                    raise Exception("Index out of range: " + str(int(key_value)) + " > "  + str(len(list_val)))
+                list_val[key_value] = (value, tp)
+            elif list_type == execution_context.types["dict"]:
+                if key_tp in [execution_context.types["void"], execution_context.types["list"], execution_context.types["dict"]]:
+                    raise Exception("Dict key must be a hashable type")
+                list_val[(key_value, key_tp)] = (value, tp)
+            else:
+                raise Exception("Can only access list or dict, not " + list_type.name)
         
         #Control Flow
         case syntax.FunctionDefinition:
@@ -279,6 +289,7 @@ def run_instruction(expression: syntax.Expression, context: execution_context.Ex
                 if parameter.value is not None:
                     raise Exception("Function parameters cannot have default values yet")
             variable = execution_context.Function(execution_context.types[expression.return_type], [(param.variable.name, execution_context.types[param.type]) for param in expression.parameters], expression.children)
+            variable.base_stack = context.stack.stack
             context.stack.define(name.name, variable)
         case syntax.IfStatement:
             (value, tp) = evaluate(expression.condition, context)
@@ -301,17 +312,35 @@ def run_instruction(expression: syntax.Expression, context: execution_context.Ex
                 raise Exception("While conditions must be bool-type")
             if value:
                 context.move_into(expression.children)
-        case syntax.ForLoop as forexpression:
-            (list_val, list_type) = evaluate(forexpression.over)
-            if list_type != execution_context.types["list"]:
-                raise Exception("Can only iterate over list")
-            
-            
-            pass #TODO
+        case syntax.ForLoop:
+            (list_val, list_type) = evaluate(expression.over, context)
+            if list_type == execution_context.types["list"] or list_type == execution_context.types["dict"]:
+                iterator = context.next_iterator(expression)
+                if iterator >= len(list_val):
+                    context.destroy_iterator(expression)
+                else:
+                    if list_type == execution_context.types["list"]:
+                        (val_val, val_type) = list_val[iterator]
+                    else:
+                        idx = 0
+                        for key in list_val:
+                            if idx == iterator:
+                                break
+                            idx += 1
+                        (val_val, val_type) = key
+                        
+                    context.move_into(expression.children)
+                    context.stack.define(expression.variable.name, execution_context.Variable(val_type, val_val))
+            else:
+                raise Exception("Can only iterate over list or dict, not " + str(list_type))
+
         case syntax.FunctionCall:
             run_function_call(expression, context)
         case syntax.ReturnStatement:
-            (value, tp) = evaluate(expression.value, context)
+            if expression.value is not None:
+                (value, tp) = evaluate(expression.value, context)
+            else:
+                (value, tp) = None, execution_context.types["void"]
             return (value, tp)
         
     return (None, None)
@@ -335,9 +364,15 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
         return run_operation(left, right, type_left, type_right, operator)
     elif type(expression) is syntax.UnaryOperation:
         (value, tp) = evaluate(expression.expression, context)
-        if tp != execution_context.types["bool"]:
-            raise Exception("Can only negate bool value") 
-        return (not value, tp)
+
+        if expression.operator == "!":
+            if tp != execution_context.types["bool"]:
+                raise Exception("Can only negate bool value") 
+            return (not value, tp)
+        elif expression.operator == "-":
+            if tp != execution_context.types["num"]:
+                raise Exception("Can only negate num value") 
+            return (-value, tp)
     elif type(expression) is syntax.FunctionCall:
         return run_function_call(expression, context)
     elif type(expression) is syntax.ListExpression:
@@ -370,18 +405,23 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
 
     elif type(expression) is syntax.ListAccess:
         (key, tp) = evaluate(expression.key, context)
-        if tp != execution_context.types["num"]:
-            raise Exception("List index must be of type num")
-        if key != int(key):
-            raise Exception("List index must be whole number")
-
-
         (list_val, list_type) = evaluate(expression.list, context)
-        if list_type != execution_context.types["list"]:
-            raise Exception("Can only access list, not " + list_type.name)
-        if key >= len(list_val) or key < -len(list_val):
-            raise Exception("Index out of range: " + str(int(key)) + " > " + str(len(list_val)))
-        return list_val[int(key)]
+
+        if list_type == execution_context.types["list"]:
+            if tp != execution_context.types["num"]:
+                raise Exception("List index must be of type num")
+            if key != int(key):
+                raise Exception("List index must be whole number")
+            if key >= len(list_val) or key < -len(list_val):
+                raise Exception("Index out of range: " + str(int(key)) + " > " + str(len(list_val)))
+            return list_val[int(key)]
+        elif list_type == execution_context.types["dict"]:
+            if (key, tp) not in list_val:
+                raise Exception("The key " + str(key) + " of type " + str(tp) + " was not found")
+            return list_val[(key, tp)]
+        else:
+            raise Exception("Can only access list or dict, not " + list_type.name)
+
     
     elif type(expression) is syntax.ListSliceAccess:
         num_type = execution_context.types["num"]
@@ -403,9 +443,6 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
         (list_val, list_type) = evaluate(expression.list, context)
         if list_type != execution_context.types["list"]:
             raise Exception("Can only access list, not " + list_type.name)
-        
-        if expression.end is None:
-            end_val = len(list_val)
 
         new_list = []
         start_val = int(start_val)
@@ -417,6 +454,15 @@ def evaluate(expression: syntax.Expression, context: execution_context.Execution
         start_val = int(start_val)
         end_val = int(end_val)
         step_val = int(step_val)
+
+        if step_val == 0:
+            raise Exception("List slice step cannot be 0")
+
+        if expression.end is None:
+            if step_val > 0:
+                end_val = len(list_val)
+            else:
+                end_val = -1
 
         for i in range(start_val, end_val, step_val):
             if i < 0 or i >= len(list_val):
@@ -443,9 +489,9 @@ class BuiltInFunction:
     name: str
     func: Any
 
-    def __init__(self, name: str, parameter_type_names: list[str], func: Any) -> None:
+    def __init__(self, name: str, parameter_type_names: list[str | list[str]], func: Any) -> None:
         self.name = name
-        self.parameter_types = [execution_context.types[x] for x in parameter_type_names]
+        self.parameter_types = [[execution_context.types[x]] if isinstance(x, str) else [execution_context.types[y] for y in x] for x in parameter_type_names]
         self.func = func
         
 def run_built_in(name: str, parameters: list[Tuple[Any, execution_context.VariableType]]) -> Tuple[Any, execution_context.VariableType]:
@@ -454,7 +500,7 @@ def run_built_in(name: str, parameters: list[Tuple[Any, execution_context.Variab
     if len(parameters) != len(built_in.parameter_types):
         raise Exception("Invalid number of arguments for built-in " + name)
     for (i, (value, type)) in enumerate(parameters):
-        if type != built_in.parameter_types[i] and built_in.parameter_types[i] != execution_context.types["any"]:
+        if type not in built_in.parameter_types[i] and built_in.parameter_types[i][0] != execution_context.types["any"]:
             raise Exception("Invalid parameter type for built-in " + name)
         params.append((value, type))
     return built_in.func(params)
@@ -473,15 +519,21 @@ def to_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     return (result, execution_context.types["text"])
 
 def print_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
-    print(arguments[0][0], end="")
+    arg = arguments[0][0]
+    if arguments[0][1] != execution_context.types["text"]:
+        arg = to_text(arguments)[0]
+    print(arg, end="")
     global stdout
-    stdout += str(arguments[0][0])
+    stdout += arg
     return (None, execution_context.types["void"])
 
 def println_text(arguments: list) -> Tuple[Any, execution_context.VariableType]:
-    print(arguments[0][0])
+    arg = arguments[0][0]
+    if arguments[0][1] != execution_context.types["text"]:
+        arg = to_text(arguments)[0]
+    print(arg)
     global stdout
-    stdout += str(arguments[0][0]) + "\n"
+    stdout += arg + "\n"
     return (None, execution_context.types["void"])
 
 def append(arguments: list) -> Tuple[Any, execution_context.VariableType]:
@@ -494,8 +546,11 @@ def append(arguments: list) -> Tuple[Any, execution_context.VariableType]:
 def remove(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     (list_val, list_type) = arguments[0]
     (val_val, val_type) = arguments[1]
-    
-    list_val.remove((val_val, val_type))
+
+    if list_type == execution_context.types["list"]:
+        list_val.remove((val_val, val_type))
+    elif list_type == execution_context.types["dict"]:
+        del list_val[(val_val, val_type)]
     return (None, execution_context.types["void"])
 
 def index_of(arguments: list) -> Tuple[Any, execution_context.VariableType]:
@@ -511,18 +566,25 @@ def length(arguments: list) -> Tuple[Any, execution_context.VariableType]:
     result = len(list_val)
     return (result, execution_context.types["num"])
 
+def contains(arguments: list) -> Tuple[Any, execution_context.VariableType]:
+    (list_val, list_type) = arguments[0]
+    
+    result = arguments[1] in list_val
+    return (result, execution_context.types["bool"])
+
 stdout = ""
 built_ins: dict[str, BuiltInFunction] = { 
-    "println": BuiltInFunction("println", ["text"], println_text), 
-    "print": BuiltInFunction("print", ["text"], print_text), 
+    "println": BuiltInFunction("println", ["any"], println_text), 
+    "print": BuiltInFunction("print", ["any"], print_text), 
     "to_text": BuiltInFunction("to_text", ["any"], to_text), 
     "append": BuiltInFunction("append", ["list", "any"], append), 
-    "remove": BuiltInFunction("remove", ["list", "any"], remove), 
+    "remove": BuiltInFunction("remove", [["list", "dict"], "any"], remove), 
     "index_of": BuiltInFunction("index_of", ["list", "any"], index_of), 
-    "length": BuiltInFunction("length", ["list"], length), 
+    "length": BuiltInFunction("length", [["list", "text", "dict"]], length),
+    "contains": BuiltInFunction("contains", [["list", "dict"], "any"], contains)
 }
 
 if __name__ == "__main__":
-
+    #main("antlr-test/tests/inputs/testSorting.code")
+    main("tests/inputs/testSorting.code")
     #main(sys.argv[1])
-    main("tests/inputs/test5.code")

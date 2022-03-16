@@ -1,0 +1,122 @@
+initial: list = [1, 4, 2, 9, 4, 5, 2, 8, 0, 8, 4, 2, 4, 5, 2, 1, 4, 3, 5, 8, 7]
+
+func clone_list(lst: list) -> list
+{
+    new_list: list
+    for value in lst
+    {
+        append(new_list, value)
+    }
+    return new_list
+}
+
+func selection_sort(lst: list) -> list
+{
+    lst = clone_list(lst)
+
+    n: num = length(lst)
+
+    for i in [0..n-1]
+    {
+        for j in [i + 1..n]
+        {
+            if lst[i] > lst[j]
+            {
+                temp: num = lst[i]
+                lst[i] = lst[j]
+                lst[j] = temp
+            }
+        }
+    }
+    return lst
+}
+
+func merge(l1: list, l2: list) -> list
+{
+    new_list: list
+
+    i1: num
+    i2: num
+
+    n1: num = length(l1)
+    n2: num = length(l2)
+
+    while i1 < n1 && i2 < n2
+    {
+        if l1[i1] < l2[i2]
+        {
+            append(new_list, l1[i1])
+            i1 += 1
+        }
+        else
+        {
+            append(new_list, l2[i2])
+            i2 += 1
+        }
+    }
+    while i1 < n1
+    {
+        append(new_list, l1[i1])
+        i1 += 1
+    }
+    while i2 < n2
+    {
+        append(new_list, l2[i2])
+        i2 += 1
+    }
+    return new_list
+}
+
+func merge_sort(lst: list) -> list
+{
+    n: num = length(lst)
+    if n == 1
+        return lst
+
+    l1: list = merge_sort(lst[:n//2])
+    l2: list = merge_sort(lst[n//2:])
+
+    return merge(l1, l2)
+}
+
+func quick_sort_from_to(lst: list, from: num, to: num) -> void
+{
+    if from >= to:
+    {
+        return
+    }
+    pivot_pos: num = from + (to - from) // 2
+
+    for i in [from..to]
+    {
+        if lst[i] > lst[pivot_pos] && i < pivot_pos
+        {
+            temp: num = lst[pivot_pos]
+            lst[pivot_pos] = lst[i]
+            lst[i] = temp
+            pivot_pos = i
+        }
+        else if lst[i] < lst[pivot_pos] && i > pivot_pos
+        {
+            temp: num = lst[pivot_pos]
+            lst[pivot_pos] = lst[i]
+            lst[i] = temp
+            pivot_pos = i
+        }
+    }
+
+    quick_sort_from_to(lst, from, pivot_pos)
+    quick_sort_from_to(lst, pivot_pos + 1, to)
+}
+
+func quick_sort(lst: list) -> list
+{
+    new_list: list = clone_list(lst)
+    quick_sort_from_to(new_list, 0, length(new_list))
+    return new_list
+}
+
+println(initial)
+println(selection_sort(initial))
+println(merge_sort(initial))
+println(quick_sort(initial))

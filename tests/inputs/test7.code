@@ -1,0 +1,33 @@
+func main() -> void
+{
+    number_names: dict
+    
+    number_names[0] = "Zero"
+    number_names[1] = "One"
+    number_names[2] = "Two"
+    number_names[3] = "Three"
+    number_names[4] = "Four"
+    number_names[5] = "Five"
+    number_names[6] = "Six"
+    number_names[7] = "Seven"
+    number_names[8] = "Eight"
+    number_names[9] = "Nine"
+
+    reverse_number_names: dict
+    for key in number_names
+    {
+        reverse_number_names[number_names[key]] = key
+    }
+
+    random_numbers: list = [1, 5, 9, 3, 5, 7, 2, 4, 5, 1, 9, 2, 4]
+    for numb in random_numbers
+    {
+        println(numb + " " + number_names[numb] + " " + reverse_number_names[number_names[numb]])
+    }
+
+    println(length(reverse_number_names))
+    remove(reverse_number_names, "Two")
+    println(length(reverse_number_names))
+}
+
+main()

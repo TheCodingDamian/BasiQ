@@ -1,0 +1,51 @@
+func main() -> void
+{
+    for x in [1, 2, 3, 4, 5]
+    {
+        println(x + "")
+    }
+
+    for x in [1..5]
+    {
+        for y in [1..5]
+        {
+            print("(" + x + "/" + y + ")")
+        }
+        println("")
+    }
+
+    y: list = ["Hello", "World", "how", "are", "you", 2, "day?"]
+    for x in y
+    {
+        print(x + " ")
+    }
+    println("")
+
+    for y in y
+    {
+        print(y + " ")
+    }
+    println("")
+
+    
+    for x in y[6::-1]
+    {
+        print(x + " ")
+    }
+    println("")
+
+    println(power_of_two(6) + "")
+
+}
+
+func power_of_two(n: num) -> num
+{
+    sum: num = 0
+    for i in [0..n]
+    {
+        sum = sum + power_of_two(i)
+    }
+    return sum + 1
+}
+
+main()

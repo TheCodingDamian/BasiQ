@@ -88,7 +88,7 @@ class GVisitor(ParseTreeVisitor):
         return syntax.WhileLoop(self.visit(ctx.condition))
 
     def visitReturnStatement(self, ctx:GParser.ReturnStatementContext):
-        return syntax.ReturnStatement(self.visit(ctx.value))
+        return syntax.ReturnStatement(self.visit(ctx.value) if ctx.value is not None else None)
 
     # Visit a parse tree produced by GParser#variableDefinition.
     def visitVariableDefinition(self, ctx:GParser.VariableDefinitionContext):
@@ -146,6 +146,12 @@ class GVisitor(ParseTreeVisitor):
         if ctx.sub is not None:
             return self.visit(ctx.sub)
         return self.visitChildren(ctx)
+
+    def visitOperationAssignment(self, ctx:GParser.OperationAssignmentContext):
+        name = syntax.Variable(ctx.name.text) 
+        op = ctx.operator.text[:-1]
+        right = self.visit(ctx.assign)
+        return syntax.OperationAssignment(name, op, right)
 
 
 

@@ -2,7 +2,7 @@ grammar G;
 
 TYPE: 'num' | 'text' | 'bool' | 'void' | 'list' | 'dict' ;
 BOOL : 'False'|'True' ;
-NUMBER : [-]? [0-9]+('.'[0-9]+)? ; //[1-9][0-9]*(.[0-9]+)?' ;
+NUMBER : [0-9]+('.'[0-9]+)? ; //[1-9][0-9]*(.[0-9]+)?' ;
 IDENTIFIER : [A-Za-z][A-Za-z0-9_]* ;
 WP : [ \t\r\n] -> skip ;
 COMMENT : [#].*? -> skip ;
@@ -50,6 +50,9 @@ functionDefinition
     | 'func' name = IDENTIFIER '(' variableDefinition (',' variableDefinition)* ')' '->' return_type = TYPE
     ;
 
+operationAssignment
+    : name = IDENTIFIER operator = ('+=' | '-=' | '*=' | '/=' | '//=' | '%=' | '**=' ) assign = expression ;
+
 assignment
     : IDENTIFIER '=' expression;
 
@@ -58,7 +61,7 @@ functionCall
     | IDENTIFIER '()';
 
 returnStatement
-    : 'return' value = expression ;
+    : 'return' (value = expression)? ;
 
 ifStatement
     : 'if' condition = expression ;
@@ -77,6 +80,7 @@ whileLoop
 
 expression
     : unop = '!' expr = expression
+    | unop = '-' expr = expression
     | left = expression op = '**' right = expression
     | left = expression op = ('*'|'/'|'//') right = expression
     | left = expression op = '%' right = expression
@@ -110,6 +114,7 @@ instruction
     | forLoop
     | whileLoop
     | listAssignment
+    | operationAssignment
     | assignment
     | BLOCK_OPEN
     | BLOCK_CLOSE

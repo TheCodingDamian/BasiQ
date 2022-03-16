@@ -27,4 +27,19 @@ class TestInterpreter:
 
     def test_five(self):
         run("tests/inputs/test5.code")
+    
+    def test_six(self):
+        run("tests/inputs/test6.code")
+    
+    def test_seven(self):
+        run("tests/inputs/test7.code")
+    
+    def test_eight(self):
+        run("tests/inputs/test8.code")
+    
+    def test_nine(self):
+        run("tests/inputs/test9.code")
+    
+    def test_sorting(self):
+        run("tests/inputs/testSorting.code")
 

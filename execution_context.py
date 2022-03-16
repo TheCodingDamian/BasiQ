@@ -90,10 +90,14 @@ class VariableStack:
         if variable.value is None:
             if variable.variable_type == types["num"]:
                 variable.value = 0
-            if variable.variable_type == types["text"]:
+            elif variable.variable_type == types["text"]:
                 variable.value = ""
-            if variable.variable_type == types["bool"]:
+            elif variable.variable_type == types["bool"]:
                 variable.value = False
+            elif variable.variable_type == types["list"]:
+                variable.value = []
+            elif variable.variable_type == types["dict"]:
+                variable.value = {}
         self.stack[0][name] = variable
 
     def top(self) -> VariableStackEntry:
@@ -117,10 +121,13 @@ class ExecutionContext:
     instruction_counter: int
     min_scope_length: int
 
+    iterators: dict[syntax.ForLoop, int]
+
     def __init__(self, instructions: list[Expression], min_scope_length: int = 1) -> None:
         self.stack = VariableStack(instructions)
         self.instruction_counter = 0
         self.min_scope_length = min_scope_length
+        self.iterators = dict()
 
     def current_expression(self) -> Expression:
         if len(self.stack.stack) < self.min_scope_length:
@@ -157,4 +164,11 @@ class ExecutionContext:
         return self.stack.top().entered_if
 
     def next_iterator(self, for_loop: syntax.ForLoop) -> int:
-        pass #TODO
+        if for_loop not in self.iterators:
+            self.iterators[for_loop] = -1
+        self.iterators[for_loop] += 1
+        return self.iterators[for_loop]
+
+    def destroy_iterator(self, for_loop: syntax.ForLoop) -> None:
+        del self.iterators[for_loop]
+        

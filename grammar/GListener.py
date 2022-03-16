@@ -98,6 +98,15 @@ class GListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by GParser#operationAssignment.
+    def enterOperationAssignment(self, ctx:GParser.OperationAssignmentContext):
+        pass
+
+    # Exit a parse tree produced by GParser#operationAssignment.
+    def exitOperationAssignment(self, ctx:GParser.OperationAssignmentContext):
+        pass
+
+
     # Enter a parse tree produced by GParser#assignment.
     def enterAssignment(self, ctx:GParser.AssignmentContext):
         pass
