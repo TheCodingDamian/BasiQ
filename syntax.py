@@ -1,11 +1,17 @@
 from __future__ import annotations
+from ast import Expr
 from turtle import st
 
 
 
 
 class Expression:
-    pass
+    line_number: int
+    code: str
+
+    def __init__(self) -> None:
+        self.line_number = -1
+        self.code = ""
 
 class BlockExpression(Expression):
     children: list[Expression]

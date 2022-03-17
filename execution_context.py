@@ -2,6 +2,7 @@ from typing import Any, Tuple
 
 from syntax import Expression
 import syntax
+from utils import InterpretationException
 
 class VariableType:
     name: str
@@ -73,20 +74,20 @@ class VariableStack:
         for frame in self.stack:
             if key in frame:
                 return frame[key]
-        raise Exception("Variable " + key + " unknown")
+        raise InterpretationException("Variable " + key + " unknown")
     
     def __setitem__(self, key: str, value: Variable) -> None:
         for frame in self.stack:
             if key in frame:
                 frame[key] = value
                 return
-        raise Exception("Variable " + key + " unknown")
+        raise InterpretationException("Variable " + key + " unknown")
 
     def define(self, name: str, variable: Variable) -> None:
         if name in self.stack[0]:
-            raise Exception("Variable " + name + " already exists")
+            raise InterpretationException("Variable " + name + " already exists")
         if variable.variable_type == types["void"]:
-            raise Exception("Cannot create void-type variable")
+            raise InterpretationException("Cannot create void-type variable")
         if variable.value is None:
             if variable.variable_type == types["num"]:
                 variable.value = 0
@@ -97,7 +98,7 @@ class VariableStack:
             elif variable.variable_type == types["list"]:
                 variable.value = []
             elif variable.variable_type == types["dict"]:
-                variable.value = {}
+                variable.value = {"keys": []}
         self.stack[0][name] = variable
 
     def top(self) -> VariableStackEntry:

@@ -81,29 +81,27 @@ func merge_sort(lst: list) -> list
 
 func quick_sort_from_to(lst: list, from: num, to: num) -> void
 {
-    if from >= to:
+    if from >= to || from < 0:
     {
         return
     }
-    pivot_pos: num = from + (to - from) // 2
+    pivot_pos: num = from - 1
+    pivot: num = lst[to - 1]
 
-    for i in [from..to]
+    for i in [from..to - 1]
     {
-        if lst[i] > lst[pivot_pos] && i < pivot_pos
+        if lst[i] <= pivot
         {
+            pivot_pos += 1
             temp: num = lst[pivot_pos]
             lst[pivot_pos] = lst[i]
             lst[i] = temp
-            pivot_pos = i
-        }
-        else if lst[i] < lst[pivot_pos] && i > pivot_pos
-        {
-            temp: num = lst[pivot_pos]
-            lst[pivot_pos] = lst[i]
-            lst[i] = temp
-            pivot_pos = i
         }
     }
+    pivot_pos += 1
+    temp: num = lst[pivot_pos]
+    lst[pivot_pos] = lst[to - 1]
+    lst[to - 1] = temp
 
     quick_sort_from_to(lst, from, pivot_pos)
     quick_sort_from_to(lst, pivot_pos + 1, to)

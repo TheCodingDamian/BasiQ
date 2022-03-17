@@ -5,6 +5,8 @@ x = 3
 z: num = x + y
 a: num = z ** y
 
+#COMMENT
+
 result: text = to_text(a)
 println(result)
 
